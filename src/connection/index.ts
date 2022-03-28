@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import { config as ConfigAws } from 'aws-sdk';
 import consumer from 'consumer';
 import { createChannel } from 'create';
 
@@ -10,19 +10,19 @@ interface MessegerProps {
 }
 
 export default class Messeger {
-  private apiVersion;
+  private apiVersion: string | undefined;
 
-  private accessKeyId;
+  private accessKeyId: string | undefined;
 
-  private secretAccessKey;
+  private secretAccessKey: string | undefined;
 
-  private region;
+  private region: string | undefined;
 
-  private topicArn: any;
+  private topicArn: string | undefined;
 
-  private queueUrl: any;
+  private queueUrl: string | undefined;
 
-  private queueArn: any;
+  private queueArn: string | undefined;
 
   constructor({
     apiVersion,
@@ -44,7 +44,7 @@ export default class Messeger {
       region: this.region,
     };
 
-    AWS.config.update({ ...SNSConfig });
+    ConfigAws.update({ ...SNSConfig });
   }
 
   configChannel(QueueArn: any, QueueUrl: any, topicArn: any): void {

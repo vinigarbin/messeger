@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import { SQS, SNS, config as ConfigAws } from 'aws-sdk';
 
 async function createTopic(sns: any, topicName: string): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -127,10 +127,10 @@ function setQueueAttr(
 }
 
 async function createChannel(config: any, name: string): Promise<any> {
-  AWS.config.update({ ...config });
+  ConfigAws.update({ ...config });
 
-  const sns = new AWS.SNS();
-  const sqs = new AWS.SQS();
+  const sns = new SNS();
+  const sqs = new SQS();
 
   const { TopicArn } = await createTopic(sns, name);
   const { QueueUrl } = await createQueue(sqs, name);

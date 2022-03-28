@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import { config as ConfigAws, SQS } from 'aws-sdk';
 
 let messages = [] as any;
 
@@ -12,8 +12,8 @@ function getMessages(sqs: any, QueueUrl: any) {
 }
 
 async function consumer(config: any, QueueUrl: any): Promise<any> {
-  AWS.config.update({ ...config });
-  const sqs = new AWS.SQS();
+  ConfigAws.update({ ...config });
+  const sqs = new SQS();
   getMessages(sqs, QueueUrl);
   return messages;
 }
