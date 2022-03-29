@@ -1,6 +1,7 @@
 import { config as ConfigAws } from 'aws-sdk';
 import consumer from 'consumer';
 import { createChannel } from 'create';
+import producer from 'publish';
 
 interface MessegerProps {
   apiVersion: string | undefined;
@@ -59,5 +60,9 @@ export default class Messeger {
 
   async consume(configAws: any): Promise<any> {
     return consumer(configAws, this.queueUrl);
+  }
+
+  async produce(configAws: any, message: any): Promise<any> {
+    return producer(configAws, this.topicArn, message);
   }
 }

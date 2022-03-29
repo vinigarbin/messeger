@@ -8,7 +8,7 @@
     "emitDeclarationOnly": true,
     "declarationMap": true,
     "lib": ["ES2020"],
-    "module": "esnext",
+    "module": "commonjs",
     "moduleResolution": "node",
     "target": "esnext",
     "strict": true,

@@ -1,32 +1,37 @@
-// /* eslint-disable no-use-before-define */
-// import AWS from 'aws-sdk';
-// import 'dotenv/config';
-// import config from '../../config.json';
+/* eslint-disable no-use-before-define */
+import { config as ConfigAws, SNS } from 'aws-sdk';
 
-// const SNSConfig = {
-//   apiVersion: '2012-11-05',
-//   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-//   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-//   region: 'us-east-1',
-// };
+function publish(sns: any, TopicArn: any, message: any) {
+  return new Promise((resolve, reject) => {
+    const publishParams = {
+      TopicArn,
+      Message: message,
+    };
 
-// AWS.config.update({ ...SNSConfig });
+    try {
+      const published = sns.publish(publishParams).promise();
 
-// const sns = new AWS.SNS();
+      published
+        .then((data: any) => {
+          resolve({ messageId: data.MessageId });
+        })
+        .catch((err: any) => {
+          throw err;
+        });
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
 
-// function publish(message: any) {
-//   const publishParams = {
-//     TopicArn: config.TopicArn,
-//     Message: message,
-//   };
+async function producer(
+  config: any,
+  TopicArn: any,
+  message: any,
+): Promise<any> {
+  ConfigAws.update({ ...config });
+  const sns = new SNS();
+  return publish(sns, TopicArn, message);
+}
 
-//   sns.publish(publishParams, (err, data) => {
-//     console.log(data);
-//   });
-// }
-
-// async function run() {
-//   publish(`message: ${'i'}`);
-// }
-
-// run().catch(console.error);
+export default producer;

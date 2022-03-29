@@ -76,9 +76,9 @@ function snsSubscribe(sns: any, TopicArn: string, QueueArn: string): void {
     },
     (err: any, result: any) => {
       if (err !== null) {
-        console.log(err);
+        throw err;
       }
-      console.log(result);
+      console.log(`Subscribe in ${TopicArn} is successfully`, +result);
     },
   );
 }
@@ -119,9 +119,9 @@ function setQueueAttr(
     },
     (err: any, result: any) => {
       if (err !== null) {
-        console.log(err);
+        throw err;
       }
-      console.log(result);
+      console.log(`Set Policy ${QueueUrl} is successfully`, +result);
     },
   );
 }
