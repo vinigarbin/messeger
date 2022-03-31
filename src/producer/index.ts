@@ -1,5 +1,4 @@
-/* eslint-disable no-use-before-define */
-import { config as ConfigAws, SNS } from 'aws-sdk';
+import { IConnectionProps } from 'interfaces/IConnectionProps';
 
 function publish(sns: any, TopicArn: any, message: any) {
   return new Promise((resolve, reject) => {
@@ -24,14 +23,8 @@ function publish(sns: any, TopicArn: any, message: any) {
   });
 }
 
-async function producer(
-  config: any,
-  TopicArn: any,
-  message: any,
-): Promise<any> {
-  ConfigAws.update({ ...config });
-  const sns = new SNS();
-  return publish(sns, TopicArn, message);
+async function producer(props: IConnectionProps, message: any): Promise<any> {
+  return publish(props.sns, props.channel?.TopicArn, message);
 }
 
 export default producer;

@@ -1,76 +1,81 @@
+import AWS from 'aws-sdk';
+import Connection from 'connection';
+import consumer from 'consumer';
+import createOrFindChannel from 'create';
+import { IConnectionProps } from 'interfaces/IConnectionProps';
+import producer from 'producer';
 import isJsonString from '../utils/IsJsonString';
-import Messeger from '../connection';
-
-interface AWSConfig {
-  apiVersion: string | undefined;
-  accessKeyId: string | undefined;
-  secretAccessKey: string | undefined;
-  region: string | undefined;
-}
+import { IAwsConfig } from '../interfaces/IAwsConfig';
 
 export interface SubscribeProps {
   topicName: string;
-  awsConfig: AWSConfig;
+  awsConfig: IAwsConfig;
   cb: CallableFunction;
 }
 export interface PublishProps {
   topicName: string;
-  awsConfig: AWSConfig;
+  awsConfig: IAwsConfig;
   message: any;
 }
 
-async function config(topicName: string, aswConfig: AWSConfig): Promise<any> {
-  const messeger = new Messeger(aswConfig);
+export default class Messeger {
+  private topicName: string;
 
-  const { QueueArn, QueueUrl, TopicArn } = await messeger.create(
-    messeger,
-    topicName,
-  );
+  private awsConfig: IAwsConfig;
 
-  return {
-    configAws: messeger.configChannel(QueueArn, QueueUrl, TopicArn),
-    messeger,
-  };
-}
+  connection: IConnectionProps;
 
-async function subscribe({
-  topicName,
-  awsConfig,
-  cb,
-}: SubscribeProps): Promise<void> {
-  const { configAws, messeger } = await config(topicName, awsConfig);
+  constructor(topicName: string, awsConfig: IAwsConfig) {
+    this.topicName = topicName;
+    this.awsConfig = awsConfig;
+  }
 
-  messeger.consume(configAws).then((messages: any) => {
-    if (Array.isArray(messages)) {
-      const formattedMessages = messages.map(data => {
-        const { Body, ReceiptHandle } = data;
-        const json = JSON.parse(Body);
-        let message = json.Message;
+  async createOrConnect(): Promise<void> {
+    AWS.config.update({
+      ...this.awsConfig,
+    });
 
-        if (isJsonString(message)) {
-          message = JSON.parse(json.Message);
-        }
+    const sns = new AWS.SNS();
+    const sqs = new AWS.SQS();
 
-        return {
-          messageId: json.MessageId,
-          timestamp: json.Timestamp,
-          message,
-          receiptHandle: ReceiptHandle,
-        };
-      });
-      cb(formattedMessages);
-    }
-  });
-  setTimeout(() => subscribe({ topicName, awsConfig, cb }), 10000);
-}
+    const channel = await createOrFindChannel(this.topicName, sns, sqs);
 
-async function publish({
-  topicName,
-  awsConfig,
-  message,
-}: PublishProps): Promise<any> {
-  const { configAws, messeger } = await config(topicName, awsConfig);
-  return messeger.produce(configAws, message);
+    this.connection = new Connection({
+      awsConfig: this.awsConfig,
+      channel,
+      sqs,
+      sns,
+    });
+  }
+
+  async subscribe(callback: CallableFunction, interval = 10000): Promise<any> {
+    consumer({ ...this.connection }).then((messages: any) => {
+      if (Array.isArray(messages)) {
+        const formattedMessages = messages.map(data => {
+          const { Body, ReceiptHandle } = data;
+          const json = JSON.parse(Body);
+          let message = json.Message;
+
+          if (isJsonString(message)) {
+            message = JSON.parse(json.Message);
+          }
+
+          return {
+            messageId: json.MessageId,
+            timestamp: json.Timestamp,
+            message,
+            receiptHandle: ReceiptHandle,
+          };
+        });
+        callback(formattedMessages);
+      }
+    });
+    setTimeout(() => this.subscribe(callback), interval);
+  }
+
+  async publish(message: string): Promise<void> {
+    return producer({ ...this.connection }, message);
+  }
 }
 
 // async function deleteMessageFromQueue({
@@ -81,4 +86,4 @@ async function publish({
 //   return messeger.produce(configAws, message);
 // }
 
-export { subscribe, publish };
+// export { subscribe, publish, create };
