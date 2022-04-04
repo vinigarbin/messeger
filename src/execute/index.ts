@@ -4,6 +4,7 @@ import consumer from 'consumer';
 import createOrFindChannel from 'create';
 import { IConnectionProps } from 'interfaces/IConnectionProps';
 import producer from 'producer';
+import deleteMessage from 'delete';
 import isJsonString from '../utils/IsJsonString';
 import { IAwsConfig } from '../interfaces/IAwsConfig';
 
@@ -67,7 +68,10 @@ export default class Messeger {
             receiptHandle: ReceiptHandle,
           };
         });
-        callback(formattedMessages);
+        callback(formattedMessages, {
+          connection: this.connection,
+          deleteMessage,
+        });
       }
     });
     setTimeout(() => this.subscribe(callback), interval);
@@ -76,6 +80,15 @@ export default class Messeger {
   async publish(message: string): Promise<void> {
     return producer({ ...this.connection }, message);
   }
+
+  // async deleteMessage(
+  //   connection: IConnectionProps,
+  //   ReceiptHandle?: string,
+  // ): Promise<void> {
+  //   if (ReceiptHandle) return deleteMessage({ connection }, ReceiptHandle);
+
+  //   return console.log('ReceiptHandle must be informed');
+  // }
 }
 
 // async function deleteMessageFromQueue({

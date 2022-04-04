@@ -8,7 +8,12 @@ async function createOrFindChannel(
   sqs: SQS,
 ): Promise<any> {
   const { TopicArn } = await createTopic(sns, topicName);
-  const { QueueUrl } = await createQueue(sqs, topicName);
+  const { QueueUrl: deadLetterQueueUrl } = await createQueue(sqs, topicName);
+  const { QueueArn: deadLetterQueueArn } = await getQueueAttr(
+    sqs,
+    deadLetterQueueUrl,
+  );
+  const { QueueUrl } = await createQueue(sqs, topicName, deadLetterQueueArn);
   const { QueueArn } = await getQueueAttr(sqs, QueueUrl);
   await setQueueAttr(sqs, TopicArn, QueueArn, QueueUrl);
   await snsSubscribe(sns, TopicArn, QueueArn);

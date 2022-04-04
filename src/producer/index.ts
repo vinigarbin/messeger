@@ -5,6 +5,9 @@ function publish(sns: any, TopicArn: any, message: any) {
     const publishParams = {
       TopicArn,
       Message: message,
+      MessageAttributes: {
+        Payload: { DataType: 'String', StringValue: 'Test' },
+      },
     };
 
     try {

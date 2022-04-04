@@ -6,7 +6,7 @@ async function findQueue(sqs: any, queueName: string): Promise<any> {
 
       findQueues
         .then((data: any) => {
-          const queueUrl = data?.QueueUrls.find((url: string) => {
+          const queueUrl = data?.QueueUrls?.find((url: string) => {
             if (url.includes(queueName)) {
               console.log(`Finded a queue with name: ${queueName}`);
 
@@ -31,8 +31,14 @@ async function findQueue(sqs: any, queueName: string): Promise<any> {
   });
 }
 
-async function createQueue(sqs: any, queueName: string): Promise<any> {
-  const QueueUrl = await findQueue(sqs, queueName);
+async function createQueue(
+  sqs: any,
+  queueName: string,
+  deadLetterQueueArn?: string,
+): Promise<any> {
+  const name = deadLetterQueueArn ? queueName : `${queueName}-failed`;
+
+  const QueueUrl = await findQueue(sqs, name);
 
   if (QueueUrl) {
     return Promise.resolve({ QueueUrl });
@@ -40,16 +46,31 @@ async function createQueue(sqs: any, queueName: string): Promise<any> {
 
   return new Promise((resolve, reject) => {
     try {
-      console.log(`Creating a queue with name ${queueName}`);
+      console.log(`Creating a queue with name ${name}`);
+
+      const params = {
+        QueueName: name,
+      } as any;
+
+      const redrivePolicyJSON = {
+        deadLetterTargetArn: deadLetterQueueArn,
+        maxReceiveCount: 10,
+      };
+
+      if (deadLetterQueueArn) {
+        params.Attributes = {
+          RedrivePolicy: JSON.stringify(redrivePolicyJSON),
+        };
+      }
       const create = sqs
         .createQueue({
-          QueueName: queueName,
+          ...params,
         })
         .promise();
 
       create
         .then((data: any) => {
-          console.log(`${queueName} created successfully`);
+          console.log(`${name} created successfully`);
           resolve({ QueueUrl: data.QueueUrl });
         })
         .catch((err: any) => {

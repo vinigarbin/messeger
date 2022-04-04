@@ -1,10 +1,4 @@
-import { SQS } from 'aws-sdk';
 import { IConnectionProps } from 'interfaces/IConnectionProps';
-
-interface ConsumerProps {
-  QueueUrl: string;
-  sqs: SQS;
-}
 
 let messages = [] as any;
 

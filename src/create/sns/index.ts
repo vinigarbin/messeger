@@ -22,6 +22,7 @@ async function findTopic(sns: any, topicName: string): Promise<any> {
 
           if (!topicArn) {
             console.log(`Topic ${topicName} not found`);
+            resolve({ TopicArn: null });
           }
 
           resolve(topicArn);
