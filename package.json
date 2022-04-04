@@ -1,15 +1,14 @@
 {
   "name": "vg.messeger",
   "author": "Vinicius Garbin <@vinicius.garbin>",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist/src/index.js",
   "module": "dist/src/index.mjs",
   "browser": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "dev:server": "ts-node-dev -r tsconfig-paths/register --inspect --transpile-only --ignore-watch node_modules src/server.ts",
-    "start": "ts-node-dev -r tsconfig-paths/register --inspect --transpile-only --ignore-watch node_modules src/index.ts",
+    "test": "ts-node-dev -r tsconfig-paths/register --inspect --transpile-only --ignore-watch node_modules test.ts",
     "build": "rimraf dist && tsc --declaration && rollup -c"
   },
   "repository": {
@@ -17,8 +16,7 @@
     "url": "git+https://github.com/vinigarbin/messeger.git"
   },
   "dependencies": {
-    "aws-sdk": "^2.1099.0",
-    "dotenv": "^16.0.0"
+    "aws-sdk": "^2.1099.0"
   },
   "devDependencies": {
     "@babel/core": "^7.17.8",
