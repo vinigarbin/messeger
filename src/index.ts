@@ -1,3 +1,3 @@
-import execute from './execute';
+import Messeger from 'execute';
 
-export default execute;
+export default Messeger;
